@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FONTE — Ton programme commence ici</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101114;
+    --bg-alt:#1B1D22;
+    --panel:#202226;
+    --steel:#3A3D44;
+    --steel-light:#4b4e56;
+    --chalk:#E4FF3D;
+    --rust:#FF4438;
+    --text:#F2F1EC;
+    --text-dim:#9A9CA3;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace; letter-spacing:0.04em;}
+  h1,h2,h3,.display{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    line-height:0.95;
+  }
+  ::selection{background:var(--chalk); color:#101114;}
+  a{color:inherit;}
+
+  /* ---------- layout scaffolding: screens ---------- */
+  .screen{
+    display:none;
+    min-height:100vh;
+    width:100%;
+    position:relative;
+  }
+  .screen.active{display:block; animation:fadeIn .5s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .topbar{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 5%;
+    mix-blend-mode:difference;
+  }
+  .logo{font-family:'Anton',sans-serif; font-size:22px; letter-spacing:0.03em; color:#fff;}
+  .logo span{color:var(--chalk); mix-blend-mode:normal;}
+  .topbar nav a{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase;
+    color:#fff; text-decoration:none; letter-spacing:0.08em; cursor:pointer;
+  }
+
+  /* ---------- HERO ---------- */
+  #screen-hero{
+    background:
+      repeating-linear-gradient(115deg, rgba(228,255,61,0.035) 0 2px, transparent 2px 42px),
+      radial-gradient(ellipse 90% 70% at 50% 0%, #1c1f24 0%, #101114 60%);
+    display:flex; align-items:center; justify-content:center;
+    padding:140px 5% 80px;
+  }
+  .hero-wrap{max-width:1100px; width:100%; text-align:center; position:relative;}
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--chalk);
+    letter-spacing:0.25em; text-transform:uppercase; margin-bottom:22px; display:inline-block;
+    border:1px solid var(--steel); padding:7px 16px; border-radius:100px;
+  }
+  .hero-title{
+    font-size:clamp(48px, 10vw, 128px);
+    color:var(--text);
+  }
+  .hero-title em{font-style:normal; color:var(--chalk);}
+  .hero-sub{
+    max-width:560px; margin:26px auto 40px; color:var(--text-dim); font-size:17px; line-height:1.6;
+  }
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14px; letter-spacing:0.05em;
+    text-transform:uppercase; padding:17px 34px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+    display:inline-flex; align-items:center; gap:10px;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--chalk); color:#101114; box-shadow:0 0 0 0 rgba(228,255,61,0.5);}
+  .btn-primary:hover{box-shadow:0 8px 30px -4px rgba(228,255,61,0.45); transform:translateY(-2px);}
+  .btn-ghost{background:transparent; color:var(--text); border:1px solid var(--steel-light);}
+  .btn-ghost:hover{border-color:var(--chalk); color:var(--chalk);}
+  .btn-rust{background:var(--rust); color:#fff;}
+  .btn-rust:hover{box-shadow:0 8px 30px -4px rgba(255,68,56,0.5); transform:translateY(-2px);}
+
+  .hero-plates{
+    display:flex; justify-content:center; gap:14px; margin-top:64px; flex-wrap:wrap;
+  }
+  .plate-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim);
+    border:1px solid var(--steel); border-radius:100px; padding:8px 18px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .plate-tag::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--chalk); display:block;}
+
+  .photo-note{
+    margin-top:70px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--steel-light);
+  }
+
+  /* ---------- SECTION shared ---------- */
+  .stage{
+    min-height:100vh; padding:130px 5% 80px; display:flex; flex-direction:column; align-items:center;
+  }
+  .card-frame{
+    max-width:640px; width:100%; background:var(--bg-alt); border:1px solid var(--steel);
+    border-radius:var(--radius); padding:44px; position:relative; overflow:hidden;
+  }
+  .card-frame::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg, var(--chalk), transparent 60%);
+  }
+
+  /* stepper / signature element */
+  .stepper{display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:38px;}
+  .plate{
+    width:38px; height:38px; border-radius:50%; border:2px solid var(--steel-light);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-dim);
+    transition:all .3s ease; background:var(--panel);
+  }
+  .plate.done{background:var(--chalk); border-color:var(--chalk); color:#101114; font-weight:700;}
+  .plate.now{border-color:var(--chalk); color:var(--chalk);}
+  .bar-line{width:34px; height:2px; background:var(--steel);}
+  .bar-line.done{background:var(--chalk);}
+
+  .form-step{display:none;}
+  .form-step.active{display:block; animation:fadeIn .35s ease;}
+  .step-label{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--chalk); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:10px;}
+  .step-title{font-size:30px; margin-bottom:28px;}
+
+  .choice-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:8px;}
+  .choice-grid.cols-1{grid-template-columns:1fr;}
+  .choice{
+    border:1px solid var(--steel); background:var(--panel); border-radius:10px; padding:16px 18px;
+    cursor:pointer; text-align:left; color:var(--text); font-family:'Inter',sans-serif;
+    font-weight:600; font-size:14px; transition:all .15s ease;
+  }
+  .choice small{display:block; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:11px; color:var(--text-dim); margin-top:4px; text-transform:none;}
+  .choice:hover{border-color:var(--steel-light);}
+  .choice.selected{border-color:var(--chalk); background:rgba(228,255,61,0.08); color:var(--chalk);}
+  .choice.selected small{color:var(--chalk); opacity:0.75;}
+
+  .age-input{
+    width:100%; background:var(--panel); border:1px solid var(--steel); border-radius:10px;
+    padding:18px; font-size:22px; font-family:'IBM Plex Mono',monospace; color:var(--text);
+    outline:none; margin-bottom:6px;
+  }
+  .age-input:focus{border-color:var(--chalk);}
+  .field-hint{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); margin-bottom:24px;}
+
+  .step-actions{display:flex; justify-content:space-between; align-items:center; margin-top:32px;}
+  .link-back{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); background:none; border:none; cursor:pointer; text-transform:uppercase; letter-spacing:0.05em;}
+  .link-back:hover{color:var(--text);}
+
+  /* ---------- RESULTS ---------- */
+  .results-head{max-width:900px; width:100%; text-align:center; margin-bottom:50px;}
+  .results-tag{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--chalk); letter-spacing:0.15em; text-transform:uppercase;}
+  .results-title{font-size:clamp(32px,5vw,56px); margin-top:10px;}
+  .results-summary{color:var(--text-dim); margin-top:14px; font-size:15px;}
+
+  .exo-grid{
+    max-width:1000px; width:100%; display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:18px; margin-bottom:60px;
+  }
+  .exo-card{
+    background:var(--bg-alt); border:1px solid var(--steel); border-radius:var(--radius);
+    padding:26px; position:relative; overflow:hidden;
+  }
+  .exo-num{
+    font-family:'Anton',sans-serif; font-size:44px; color:var(--steel-light); position:absolute; top:10px; right:18px; opacity:0.5;
+  }
+  .exo-name{font-size:21px; margin-bottom:10px; max-width:80%;}
+  .exo-stats{display:flex; gap:16px; margin-bottom:18px;}
+  .exo-stat{font-family:'IBM Plex Mono',monospace;}
+  .exo-stat b{display:block; color:var(--chalk); font-size:17px;}
+  .exo-stat span{font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;}
+  .exo-video{
+    display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:12px;
+    color:var(--text); text-decoration:none; border:1px solid var(--steel); padding:9px 14px; border-radius:100px;
+  }
+  .exo-video:hover{border-color:var(--chalk); color:var(--chalk);}
+
+  /* ---------- PREMIUM ---------- */
+  .premium-panel{
+    max-width:760px; width:100%; background:linear-gradient(160deg, #1c1e23, #141518);
+    border:1px solid var(--steel); border-radius:20px; padding:48px; text-align:center; position:relative;
+  }
+  .lock-icon{
+    width:52px; height:52px; margin:0 auto 22px; border-radius:50%; background:var(--rust);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .premium-title{font-size:34px; margin-bottom:14px;}
+  .premium-sub{color:var(--text-dim); max-width:460px; margin:0 auto 34px; line-height:1.6; font-size:15px;}
+  .premium-feats{display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:480px; margin:0 auto 36px; text-align:left;}
+  .feat{font-size:13px; color:var(--text); display:flex; gap:10px; align-items:flex-start;}
+  .feat::before{content:'✓'; color:var(--chalk); font-weight:700;}
+  .price-tag{font-family:'Anton',sans-serif; font-size:46px; margin-bottom:4px;}
+  .price-tag span{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-dim); text-transform:uppercase;}
+
+  /* CCP modal */
+  .modal-bg{
+    display:none; position:fixed; inset:0; background:rgba(8,9,10,0.85); backdrop-filter:blur(6px);
+    z-index:100; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-bg.active{display:flex;}
+  .modal{
+    background:var(--bg-alt); border:1px solid var(--steel); border-radius:var(--radius);
+    max-width:460px; width:100%; padding:36px; position:relative;
+  }
+  .modal-close{position:absolute; top:18px; right:20px; background:none; border:none; color:var(--text-dim); font-size:20px; cursor:pointer;}
+  .modal h3{font-size:24px; margin-bottom:6px;}
+  .modal p.sub{color:var(--text-dim); font-size:13px; margin-bottom:22px;}
+  .ccp-box{
+    background:var(--panel); border:1px dashed var(--steel-light); border-radius:10px; padding:20px; margin-bottom:20px;
+  }
+  .ccp-row{display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:13px; padding:7px 0; border-bottom:1px solid var(--steel);}
+  .ccp-row:last-child{border-bottom:none;}
+  .ccp-row b{color:var(--chalk);}
+  .modal-steps{font-size:13px; color:var(--text-dim); line-height:1.7; margin-bottom:24px;}
+  .modal-steps b{color:var(--text);}
+  .todo-flag{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--rust); border:1px solid var(--rust);
+    display:inline-block; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;
+  }
+
+  footer{
+    text-align:center; padding:40px 5% 60px; color:var(--steel-light); font-family:'IBM Plex Mono',monospace; font-size:11px;
+  }
+
+  @media (max-width:600px){
+    .choice-grid{grid-template-columns:1fr;}
+    .premium-feats{grid-template-columns:1fr;}
+    .card-frame, .premium-panel{padding:28px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">FONTE<span>.</span></div>
+  <nav><a onclick="goTo('hero')">Accueil</a></nav>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="screen-hero" class="screen active">
+  <div class="hero-wrap">
+    <span class="hero-eyebrow">Coaching intelligent · Spécial débutants</span>
+    <h1 class="hero-title">TON PROGRAMME<br><em>COMMENCE ICI</em></h1>
+    <p class="hero-sub">Donne ton âge, ton genre et le temps que tu peux consacrer à l'entraînement. Notre moteur génère en quelques secondes un programme adapté à ton niveau — avec les exercices et les vidéos pour bien les exécuter.</p>
+    <button class="btn btn-primary" onclick="goTo('form'); resetForm();">Créer mon programme →</button>
+    <div class="hero-plates">
+      <span class="plate-tag">Programme gratuit instantané</span>
+      <span class="plate-tag">Vidéos pour chaque exercice</span>
+      <span class="plate-tag">Version premium personnalisée</span>
+    </div>
+    <p class="photo-note">— remplace le fond par une photo de ta salle : modifie la variable CSS <code>#screen-hero</code> avec <code>background-image:url('ta-photo.jpg')</code> —</p>
+  </div>
+</section>
+
+<!-- ============ FORM ============ -->
+<section id="screen-form" class="screen">
+  <div class="stage">
+    <div class="stepper" id="stepper"></div>
+
+    <div class="card-frame">
+      <!-- step 1 : age -->
+      <div class="form-step active" data-step="1">
+        <div class="step-label">Étape 1 / 4</div>
+        <h2 class="step-title">Quel âge as-tu ?</h2>
+        <input type="number" class="age-input" id="input-age" placeholder="Ex : 24" min="12" max="90">
+        <p class="field-hint">Ça nous aide à doser l'intensité et le temps de repos.</p>
+        <div class="step-actions">
+          <span></span>
+          <button class="btn btn-primary" onclick="nextStep(1)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- step 2 : genre -->
+      <div class="form-step" data-step="2">
+        <div class="step-label">Étape 2 / 4</div>
+        <h2 class="step-title">Tu es...</h2>
+        <div class="choice-grid" id="genre-grid">
+          <button class="choice" data-val="Homme" onclick="selectChoice(this,'genre')">Homme</button>
+          <button class="choice" data-val="Femme" onclick="selectChoice(this,'genre')">Femme</button>
+        </div>
+        <div class="step-actions">
+          <button class="link-back" onclick="prevStep(2)">← Retour</button>
+          <button class="btn btn-primary" onclick="nextStep(2)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- step 3 : lieu + duree -->
+      <div class="form-step" data-step="3">
+        <div class="step-label">Étape 3 / 4</div>
+        <h2 class="step-title">Où et combien de temps ?</h2>
+        <p class="field-hint" style="margin-bottom:14px;">Lieu d'entraînement</p>
+        <div class="choice-grid" id="lieu-grid">
+          <button class="choice" data-val="maison" onclick="selectChoice(this,'lieu')">🏠 Maison<small>Sans matériel</small></button>
+          <button class="choice" data-val="salle" onclick="selectChoice(this,'lieu')">🏋️ Salle de sport<small>Avec machines / poids</small></button>
+        </div>
+        <p class="field-hint" style="margin:18px 0 14px;">Durée disponible par séance</p>
+        <div class="choice-grid" id="duree-grid">
+          <button class="choice" data-val="court" onclick="selectChoice(this,'duree')">15–20 min</button>
+          <button class="choice" data-val="moyen" onclick="selectChoice(this,'duree')">30–45 min</button>
+          <button class="choice" data-val="long" onclick="selectChoice(this,'duree')">45–60 min</button>
+          <button class="choice" data-val="tlong" onclick="selectChoice(this,'duree')">60 min +</button>
+        </div>
+        <div class="step-actions">
+          <button class="link-back" onclick="prevStep(3)">← Retour</button>
+          <button class="btn btn-primary" onclick="nextStep(3)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- step 4 : objectif -->
+      <div class="form-step" data-step="4">
+        <div class="step-label">Étape 4 / 4</div>
+        <h2 class="step-title">Ton objectif principal ?</h2>
+        <div class="choice-grid cols-1" id="objectif-grid">
+          <button class="choice" data-val="perte" onclick="selectChoice(this,'objectif')">🔥 Perte de poids<small>Priorité au cardio et au circuit</small></button>
+          <button class="choice" data-val="muscle" onclick="selectChoice(this,'objectif')">💪 Prise de muscle<small>Séries plus lourdes, plus de repos</small></button>
+          <button class="choice" data-val="forme" onclick="selectChoice(this,'objectif')">⚡ Forme générale<small>Équilibre cardio + renforcement</small></button>
+        </div>
+        <div class="step-actions">
+          <button class="link-back" onclick="prevStep(4)">← Retour</button>
+          <button class="btn btn-primary" onclick="generateProgram()">Générer mon programme →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="screen-results" class="screen">
+  <div class="stage">
+    <div class="results-head">
+      <span class="results-tag">Ton programme est prêt</span>
+      <h2 class="results-title" id="results-title">Programme débutant</h2>
+      <p class="results-summary" id="results-summary"></p>
+    </div>
+
+    <div class="exo-grid" id="exo-grid"></div>
+
+    <!-- Premium upsell -->
+    <div class="premium-panel">
+      <div class="lock-icon">🔒</div>
+      <h3 class="premium-title">Va plus loin avec le Premium</h3>
+      <p class="premium-sub">Ce programme est une base générale. Le Premium te donne un plan 100% personnalisé, adapté à ta morphologie, ton matériel réel et ta progression — plus un plan alimentaire complet.</p>
+      <div class="premium-feats">
+        <div class="feat">Programme sur-mesure ajusté chaque semaine</div>
+        <div class="feat">Plan nutritionnel personnalisé</div>
+        <div class="feat">Suivi de progression</div>
+        <div class="feat">Réponses de coach sous 24h</div>
+      </div>
+      <div class="price-tag">1 900 <span>DA / mois</span></div>
+      <button class="btn btn-rust" onclick="openModal()">Débloquer le Premium — Payer par CCP</button>
+      <div style="margin-top:16px;">
+        <button class="link-back" onclick="goTo('hero')">← Retour à l'accueil</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CCP MODAL ============ -->
+<div class="modal-bg" id="ccp-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>Paiement par CCP</h3>
+    <p class="sub">Effectue un virement CCP puis envoie-nous la preuve pour activer ton compte Premium.</p>
+    <div class="ccp-box">
+      <div class="ccp-row"><span>Titulaire du compte</span><b>À REMPLIR<span class="todo-flag">TODO</span></b></div>
+      <div class="ccp-row"><span>Numéro CCP</span><b>XXXX XXX XX<span class="todo-flag">TODO</span></b></div>
+      <div class="ccp-row"><span>Clé</span><b>XX<span class="todo-flag">TODO</span></b></div>
+      <div class="ccp-row"><span>Montant</span><b>1 900 DA</b></div>
+    </div>
+    <p class="modal-steps">
+      <b>1.</b> Effectue le virement au bureau de poste ou via BaridiMob.<br>
+      <b>2.</b> Prends une photo du reçu.<br>
+      <b>3.</b> Envoie-la sur WhatsApp au <b>À REMPLIR<span class="todo-flag">TODO</span></b> avec ton nom.<br>
+      <b>4.</b> Ton programme personnalisé et ton plan nutrition arrivent sous 24h.
+    </p>
+    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="closeModal()">J'ai compris</button>
+  </div>
+</div>
+
+<footer>FONTE — Ce programme est fourni à titre indicatif. Consulte un professionnel de santé avant de commencer une activité physique intense.</footer>
+
+<script>
+  /* ---------------- navigation ---------------- */
+  function goTo(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-'+id).classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  /* ---------------- form state ---------------- */
+  let state = {age:null, genre:null, lieu:null, duree:null, objectif:null};
+  let currentStep = 1;
+  const totalSteps = 4;
+
+  function resetForm(){
+    state = {age:null, genre:null, lieu:null, duree:null, objectif:null};
+    currentStep = 1;
+    document.querySelectorAll('.choice').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('input-age').value='';
+    document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
+    document.querySelector('.form-step[data-step="1"]').classList.add('active');
+    renderStepper();
+  }
+
+  function renderStepper(){
+    const stepper = document.getElementById('stepper');
+    stepper.innerHTML='';
+    for(let i=1;i<=totalSteps;i++){
+      const plate = document.createElement('div');
+      plate.className='plate' + (i<currentStep?' done':'') + (i===currentStep?' now':'');
+      plate.textContent = i<currentStep ? '✓' : i;
+      stepper.appendChild(plate);
+      if(i<totalSteps){
+        const line = document.createElement('div');
+        line.className='bar-line' + (i<currentStep?' done':'');
+        stepper.appendChild(line);
+      }
+    }
+  }
+  renderStepper();
+
+  function selectChoice(el, key){
+    const parent = el.parentElement;
+    parent.querySelectorAll('.choice').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    state[key] = el.dataset.val;
+  }
+
+  function showStep(n){
+    document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
+    document.querySelector('.form-step[data-step="'+n+'"]').classList.add('active');
+    currentStep = n;
+    renderStepper();
+  }
+
+  function nextStep(from){
+    if(from===1){
+      const val = document.getElementById('input-age').value;
+      if(!val || val<10 || val>95){ alert("Merci d'indiquer un âge valide."); return; }
+      state.age = val;
+    }
+    if(from===2 && !state.genre){ alert("Choisis une option."); return; }
+    if(from===3 && (!state.lieu || !state.duree)){ alert("Choisis le lieu et la durée."); return; }
+    showStep(from+1);
+  }
+  function prevStep(from){ showStep(from-1); }
+
+  /* ---------------- exercise database ---------------- */
+  const DB = {
+    maison: [
+      {name:"Squats au poids du corps", goals:["perte","muscle","forme"], muscle:"Jambes / fessiers"},
+      {name:"Pompes", goals:["perte","muscle","forme"], muscle:"Pectoraux / triceps"},
+      {name:"Fentes avant", goals:["perte","muscle","forme"], muscle:"Jambes / fessiers"},
+      {name:"Gainage planche", goals:["perte","forme","muscle"], muscle:"Sangle abdominale"},
+      {name:"Mountain climbers", goals:["perte","forme"], muscle:"Cardio / abdos"},
+      {name:"Burpees", goals:["perte"], muscle:"Cardio complet"},
+      {name:"Superman (extension dorsale)", goals:["forme","muscle"], muscle:"Bas du dos"},
+      {name:"Crunchs", goals:["perte","forme","muscle"], muscle:"Abdominaux"},
+      {name:"Jumping jacks", goals:["perte","forme"], muscle:"Cardio"},
+      {name:"Chaise contre le mur", goals:["muscle","forme"], muscle:"Quadriceps"}
+    ],
+    salle: [
+      {name:"Développé couché barre", goals:["muscle","forme"], muscle:"Pectoraux"},
+      {name:"Squat à la barre guidée", goals:["muscle","forme","perte"], muscle:"Jambes"},
+      {name:"Tirage vertical poulie", goals:["muscle","forme"], muscle:"Dos"},
+      {name:"Presse à cuisses", goals:["muscle","forme","perte"], muscle:"Jambes"},
+      {name:"Développé épaules haltères", goals:["muscle","forme"], muscle:"Épaules"},
+      {name:"Rowing haltère un bras", goals:["muscle","forme"], muscle:"Dos"},
+      {name:"Curl biceps haltères", goals:["muscle"], muscle:"Biceps"},
+      {name:"Extension triceps à la poulie", goals:["muscle"], muscle:"Triceps"},
+      {name:"Vélo ou tapis de course", goals:["perte"], muscle:"Cardio"},
+      {name:"Corde à sauter", goals:["perte","forme"], muscle:"Cardio"},
+      {name:"Presse à abdos machine", goals:["forme","muscle"], muscle:"Abdominaux"}
+    ]
+  };
+
+  const DUREE_CONF = {
+    court:{count:3, sets:2, label:"15–20 min"},
+    moyen:{count:5, sets:3, label:"30–45 min"},
+    long:{count:6, sets:3, label:"45–60 min"},
+    tlong:{count:7, sets:4, label:"60 min +"}
+  };
+  const OBJ_CONF = {
+    perte:{reps:"15–20", repos:"30 sec", label:"perte de poids"},
+    muscle:{reps:"8–12", repos:"75 sec", label:"prise de muscle"},
+    forme:{reps:"12–15", repos:"45 sec", label:"forme générale"}
+  };
+
+  function ytLink(exerciseName){
+    const q = encodeURIComponent(exerciseName + " exercice tutoriel technique");
+    return "https://www.youtube.com/results?search_query=" + q;
+  }
+
+  function generateProgram(){
+    if(!state.objectif){ alert("Choisis ton objectif."); return; }
+
+    const pool = DB[state.lieu].filter(e=>e.goals.includes(state.objectif));
+    const fallback = DB[state.lieu].filter(e=>!pool.includes(e));
+    const conf = DUREE_CONF[state.duree];
+    const objConf = OBJ_CONF[state.objectif];
+
+    let selected = pool.slice(0, conf.count);
+    if(selected.length < conf.count){
+      selected = selected.concat(fallback.slice(0, conf.count - selected.length));
+    }
+
+    document.getElementById('results-title').textContent =
+      "Programme " + objConf.label + " — " + (state.lieu==='maison' ? "à la maison" : "en salle");
+    document.getElementById('results-summary').textContent =
+      state.age + " ans · " + state.genre + " · séance de " + conf.label + " · généré selon ton profil";
+
+    const grid = document.getElementById('exo-grid');
+    grid.innerHTML = '';
+    selected.forEach((exo, i)=>{
+      const card = document.createElement('div');
+      card.className = 'exo-card';
+      card.innerHTML = `
+        <div class="exo-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="exo-name">${exo.name}</div>
+        <div class="mono" style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:16px;">${exo.muscle}</div>
+        <div class="exo-stats">
+          <div class="exo-stat"><b>${conf.sets}</b><span>Séries</span></div>
+          <div class="exo-stat"><b>${objConf.reps}</b><span>Répétitions</span></div>
+          <div class="exo-stat"><b>${objConf.repos}</b><span>Repos</span></div>
+        </div>
+        <a class="exo-video" href="${ytLink(exo.name)}" target="_blank" rel="noopener">▶ Voir la technique</a>
+      `;
+      grid.appendChild(card);
+    });
+
+    goTo('results');
+  }
+
+  /* ---------------- CCP modal ---------------- */
+  function openModal(){ document.getElementById('ccp-modal').classList.add('active'); }
+  function closeModal(){ document.getElementById('ccp-modal').classList.remove('active'); }
+</script>
+</body>
+</html>
